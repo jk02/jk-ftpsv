@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 int make_socket(uint16_t);
 
@@ -19,7 +20,8 @@ int main(int argc, char *argv[])
 {
   uint16_t portNum;
   socklen_t cliSize;
-  int socket,xferSocket;
+  int socket,xferSocket,recv_len;
+  char buffer[1024];
   struct sockaddr_in cliAddr;
     
   printf("**********FTP SERVER***********\n");
@@ -40,21 +42,40 @@ int main(int argc, char *argv[])
       printf("Awaiting connections...\n");
       cliSize = sizeof(cliAddr);
       // Establish TELNET socket with the client
-      if(xferSocket = accept(socket, (struct sockaddr*) &cliAddr, &cliSize) < 0)
+      xferSocket = accept(socket, (struct sockaddr*) &cliAddr, &cliSize);
+      if(xferSocket < 0)
 	{
 	  perror("Fatal: Could not accept connection");
 	  exit(EXIT_FAILURE);
 	}
-      puts("Accepted a client connection.");
-      // Start the FTP session per the example from the Java code... 
-      exit(EXIT_SUCCESS);
+
+      printf("%d\n", xferSocket); // Debug message to print socket fd
+      
+      printf("Server: got connection from %s on port %d.\n",
+	     inet_ntoa(cliAddr.sin_addr), ntohs(cliAddr.sin_port));
+
+      send(xferSocket, "Welcome!\n", 9, 0);
+
+      memset(&buffer, 0, sizeof(buffer));
+
+      recv_len = recv(xferSocket, &buffer, 1024, 0);
+      while(recv_len > 0)
+	{
+	  printf("RECV: %d bytes\n", recv_len);
+   	  printf("%s", &buffer);
+          memset(&buffer, 0, sizeof(buffer));
+	  recv_len = recv(xferSocket, &buffer, 1024, 0);
+  	}
+      
+      close(xferSocket);
     }
-  
+  exit(EXIT_SUCCESS);
 }
 
 int make_socket(uint16_t port)
 {
   int newSock = -1;
+  int yes = 1;
   struct sockaddr_in name;
 
   // Zero out the address struct, just to be sure
@@ -72,11 +93,20 @@ int make_socket(uint16_t port)
   name.sin_family = AF_INET;
   name.sin_port = htons(port);
   name.sin_addr.s_addr = htonl(INADDR_ANY);
+
+  // Bind address to the socket
   if(bind(newSock, (struct sockaddr *) &name, sizeof(name)) < 0)
     {
       perror("Fatal: Could not bind address to socket");
       exit(EXIT_FAILURE);
     }
-  
+
+  // Set the SO_REUSEADDR param to ensure the port is reusable
+  if(setsockopt(newSock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+    {
+      perror("Fatal: Could not set appropriate socket options.");
+      exit(EXIT_FAILURE);
+    }
+    
   return newSock;
 }
