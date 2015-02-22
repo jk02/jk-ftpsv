@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     
   printf("**********FTP SERVER***********\n");
   printf("Please enter a port: ");
-  scanf("%u", &portNum);
+  scanf("%hu", &portNum);
 
   socket = make_socket(portNum);
   printf("%d\n", socket); // Debug message to print socket file descriptor
