@@ -25,8 +25,14 @@ int main(int argc, char *argv[])
   struct sockaddr_in cliAddr;
     
   printf("**********FTP SERVER***********\n");
-  printf("Please enter a port: ");
-  scanf("%hu", &portNum);
+
+  if(argc > 1)
+    {
+      portNum = (uint16_t) strtol(argv[1], NULL, 10);
+    } else {
+    printf("Please enter a port: ");
+    scanf("%hu", &portNum);
+  }
 
   socket = make_socket(portNum);
   printf("%d\n", socket); // Debug message to print socket file descriptor
@@ -79,7 +85,7 @@ int make_socket(uint16_t port)
   struct sockaddr_in name;
 
   // Zero out the address struct, just to be sure
-  bzero((char *) &name, sizeof(name));
+  memset(&name, 0, sizeof(name));
   
   // Attempt to create a new socket
   newSock = socket(PF_INET, SOCK_STREAM, 0);
