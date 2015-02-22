@@ -8,7 +8,7 @@
 
 #include "jkftpsv.h"
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   uint16_t portNum;
   socklen_t cliSize;
@@ -52,23 +52,9 @@ int main(int argc, char *argv[])
       printf("Server: got connection from %s on port %d.\n",
 	     inet_ntoa(cliAddr.sin_addr), ntohs(cliAddr.sin_port));
 
-      send(xferSocket, "Welcome!\n", 9, 0);
-      send(xferSocket, "Type close to terminate connection.\n", 35, 0);
+      // Start the session here
 
-      memset(&buffer, 0, sizeof(buffer));
-
-      recv_len = recv(xferSocket, &buffer, 1024, 0);
-      while(recv_len > 0)
-	{
-	  if(strncmp(buffer, "close", 5) == 0)
-	    break;
-	  printf("RECV: %d bytes\n", recv_len);
-   	  printf("%s", &buffer);
-          memset(&buffer, 0, sizeof(buffer));
-	  recv_len = recv(xferSocket, &buffer, 1024, 0);
-  	}
-      
-      close(xferSocket);
+      invoke_session(xferSocket);
     }
   exit(EXIT_SUCCESS);
 }
