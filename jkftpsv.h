@@ -19,6 +19,8 @@
 #define FTPSV_H
 
 int make_socket(uint16_t);
+int invoke_session(int);
+int dispatch_command(char*);
 
 #endif /* FTPSV_H */
 
