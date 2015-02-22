@@ -1,4 +1,4 @@
-// jk-ftpsrv
+// jk-ftpsv
 // Basic FTP Server
 // FTPServer.c - Accepts connections [and transfers files]
 //
@@ -6,15 +6,7 @@
 //
 // This public domain software comes with NO WARRANTY.  See LICENSE in the repository for further details.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-int make_socket(uint16_t);
+#include "jkftpsv.h"
 
 int main(int argc, char *argv[])
 {
@@ -61,12 +53,15 @@ int main(int argc, char *argv[])
 	     inet_ntoa(cliAddr.sin_addr), ntohs(cliAddr.sin_port));
 
       send(xferSocket, "Welcome!\n", 9, 0);
+      send(xferSocket, "Type close to terminate connection.\n", 35, 0);
 
       memset(&buffer, 0, sizeof(buffer));
 
       recv_len = recv(xferSocket, &buffer, 1024, 0);
       while(recv_len > 0)
 	{
+	  if(strncmp(buffer, "close", 5) == 0)
+	    break;
 	  printf("RECV: %d bytes\n", recv_len);
    	  printf("%s", &buffer);
           memset(&buffer, 0, sizeof(buffer));
@@ -80,11 +75,11 @@ int main(int argc, char *argv[])
 
 int make_socket(uint16_t port)
 {
-  int newSock = -1;
-  int yes = 1;
+  int newSock = -1; //FD of the socket we are creating
+  int yes = 1; // Needed for setsockparam
   struct sockaddr_in name;
 
-  // Zero out the address struct, just to be sure
+  // Zero out the address struct
   memset(&name, 0, sizeof(name));
   
   // Attempt to create a new socket
