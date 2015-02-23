@@ -1,5 +1,11 @@
 CC=clang
-CFLAGS=-I.
+CFLAGS=-g -I.
+DEPS=jkftpsv.h
+OBJ=FTPServer.c FTPSession.c
 
-jk-ftpsv: FTPServer.c FTPSession.c
-	$(CC) -o jk-ftpsv FTPServer.c FTPSession.c
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+jk-ftpsv: $(OBJ)
+	@echo "Caution: Debug information being generated..."
+	$(CC) -o $@ $^ $(CFLAGS)
