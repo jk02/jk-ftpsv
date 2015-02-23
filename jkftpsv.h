@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -21,6 +22,7 @@
 int make_socket(uint16_t);
 int invoke_session(int);
 int dispatch_command(char*);
+void send_message(int,char*);
 
 #endif /* FTPSV_H */
 
