@@ -1,7 +1,7 @@
 CC=clang
 CFLAGS=-g -I.
 DEPS=jkftpsv.h
-OBJ=FTPServer.c FTPSession.c
+OBJ=FTPServer.c FTPSession.c FTPCommand.c
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
